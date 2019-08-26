@@ -13,17 +13,19 @@ class ReadThreadsTest extends TestCase
     {
         parent::setUp();
 
-        $this->thread = factory(\App\Thread::class)->create();
+        $this->thread = factory('App\Thread')->create();
     }
 
     function test_a_user_can_view_all_threads()
     {
-        $this->get('threads')->assertSee($this->thread->title);
+        $this->get('threads')
+            ->assertSee($this->thread->title);
     }
 
     function test_a_user_can_view_a_single_thread()
     {
-        $this->get('threads/' . $this->thread->id)
+        // $this->get('threads/' . $this->thread->id)
+        $this->get($this->thread->path())
             ->assertSee($this->thread->title);
     }
 
@@ -34,7 +36,7 @@ class ReadThreadsTest extends TestCase
             ->create(['thread_id' => $this->thread->id]);
 
         // When we visit a thread page
-        $this->get('threads/' . $this->thread->id)
+        $this->get($this->thread->path())
             // Then we should see the replies.
             ->assertSee($reply->body);
     }
