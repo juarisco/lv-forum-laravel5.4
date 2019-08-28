@@ -26,16 +26,51 @@ class CreateThreadsTest extends TestCase
         $this->signIn();
 
         // When we hit the endpoint to create a new thread
-        $thread = create('App\Thread');
+        $thread = make('App\Thread');
 
-        $this->post('/threads', $thread->toArray());
+        $response = $this->post('/threads', $thread->toArray());
 
         // dd($thread->path());
+        // dd($response->headers->get('Location'));
 
         // Then, when we visit the thread page.
-        $this->get($thread->path())
+        $this->get($response->headers->get('Location'))
             // We should see the new thread
             ->assertSee($thread->title)
             ->assertSee($thread->body);
+    }
+
+    function test_a_thread_requires_a_title()
+    {
+        $this->publishThread(['title' => null])
+            ->assertSessionHasErrors('title');
+    }
+
+    function test_a_thread_requires_a_body()
+    {
+        $this->publishThread(['body' => null])
+            ->assertSessionHasErrors('body');
+    }
+
+    function test_a_thread_requires_a_valid_channel()
+    {
+        factory('App\Channel', 2)->create();
+
+        $this->publishThread(['channel_id' => null])
+            ->assertSessionHasErrors('channel_id');
+
+        $this->publishThread(['channel_id' => 3])
+            ->assertSessionHasErrors('channel_id');
+    }
+
+    public function publishThread($overrides = [])
+    {
+        $this->withExceptionHandling()->signIn();
+
+        $thread = make('App\Thread', $overrides);
+
+        // dd($thread);
+
+        return $this->post('/threads', $thread->toArray());
     }
 }
