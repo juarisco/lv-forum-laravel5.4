@@ -6,8 +6,27 @@ use Illuminate\Database\Eloquent\Model;
 
 class Thread extends Model
 {
+    /**
+     * Don't auto-apply mass assigment protection.
+     * 
+     * @var array
+     */
     protected $guarded = [];
 
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::addGlobalScope('replyCount', function ($builder) {
+            $builder->withCount('replies');
+        });
+    }
+
+    /**
+     * Get a string path for the thread.
+     * 
+     * @return string
+     */
     public function path()
     {
         return "/threads/{$this->channel->slug}/{$this->id}";
