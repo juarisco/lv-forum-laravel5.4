@@ -22,13 +22,10 @@ class ThreadsController extends Controller
     public function index(Channel $channel, ThreadFilters $filters)
     {
         $threads = $this->getThreads($channel, $filters);
-        // $threads = Thread::latest()->filter($filters);
 
-        // if ($channel->exists) {
-        //     $threads->where('channel_id', $channel->id);
-        // }
-
-        // $threads = $threads->get();
+        if (request()->wantsJson()) {
+            return $threads;
+        }
 
         return view('threads.index', compact('threads'));
     }
@@ -129,6 +126,8 @@ class ThreadsController extends Controller
         if ($channel->exists) {
             $threads->where('channel_id', $channel->id);
         }
+
+        // dd($threads->toSql());
 
         return $threads->get();
     }
