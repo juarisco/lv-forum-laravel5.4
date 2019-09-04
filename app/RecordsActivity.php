@@ -13,6 +13,10 @@ trait RecordsActivity
                 $model->recordActivity($event);
             });
         }
+
+        static::deleting(function ($model) {
+            $model->activity()->delete();
+        });
     }
 
     protected static function getActivitiesToRecord()
@@ -25,7 +29,6 @@ trait RecordsActivity
         $this->activity()->create([
             'user_id' => auth()->id(),
             'type' => $this->getActivityType($event),
-
         ]);
     }
 
