@@ -8,17 +8,25 @@ use Illuminate\Http\Request;
 class ProfilesController extends Controller
 {
     /**
-     * show
+     * show the user's profile.
      *
-     * @param  mixed $user
-     *
-     * @return void
+     * @param  User $user
+     * @return \Response
      */
     public function show(User $user)
     {
         return view('profiles.show', [
             'profileUser' => $user,
-            'threads' => $user->threads()->paginate(10)
+            'activities' => $this->getActivity($user),
+            // 'activities' => \App\Activity::feed($user),
+
         ]);
+    }
+
+    protected function getActivity(User $user)
+    {
+        return $user->activity()->latest()->with('subject')->take(50)->get()->groupBy(function ($activity) {
+            return $activity->created_at->format('Y-m-d');
+        });
     }
 }
